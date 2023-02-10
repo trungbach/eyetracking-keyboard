@@ -1,0 +1,333 @@
+import React, { useEffect, useRef, useState } from 'react';
+import Keyboard from 'react-simple-keyboard';
+import Toggle from 'react-toggle';
+import Calibrate from './Calibrate';
+import SelectLayout from './SelectLayout';
+import SliderWrapper from './SliderWrapper';
+import WordSuggestions from './WordSuggestions';
+
+import 'react-simple-keyboard/build/css/index.css';
+import 'react-toggle/style.css';
+
+import "../styles/KeyboardWrapper.css";
+
+import {
+  defaults, events, specialkeys,
+  types
+} from "../constants/index";
+
+const TobiiRegion = require('../util/TobiiRegion');
+const { ipcRenderer } = window.require("electron");
+
+const KeyboardWrapper = () => {
+  const [input, setInput] = useState("");
+  const [layout, setLayout] = useState(defaults.DEFUALT_LAYOUT_STARTUP);
+  const [dwellTimeMS, setDwellTimeMS] = useState(defaults.DEFAULT_DWELL_TIME_MS);
+  const [eyetrackingIsOn, setEyetrackingIsOn] = useState(defaults.DEFAULT_EYETRACKING_ON);
+  const [gazeLog, setGazeLog] = useState({});
+
+  const keyboard = useRef();
+  const suggestions = useRef();
+
+  /**
+   * Gets screen and keyboard metadata, and pushes said info to
+   * the eyetracking module via ipc.
+   * 
+   * Begins eyetracking listen loop.
+   * 
+   * On each gaze focus event, calls onGazeFocusEvent()
+   */
+  const startGazeFocusEventListener = () => {
+    if (!eyetrackingIsOn)
+      return;
+
+    let rectangles = [];
+
+    // No, I'm not going to put this in a loop. It would look terrible!
+
+    keyboard.current.recurseButtons(buttonElement => {
+      rectangles.push(
+        new TobiiRegion(rectangles.length, types.KEYBOARD_KEY, buttonElement)
+      );
+    });
+
+    suggestions.current.recurseButtons(buttonElement => {
+      rectangles.push(
+        new TobiiRegion(rectangles.length, types.SUGGESTED_WORD_BLOCK, buttonElement)
+      );
+    });
+
+    let dimensions = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      rectangles: rectangles
+    };
+
+    console.log(dimensions);
+
+    // Start Tobii listen loop
+    ipcRenderer.send(events.ASYNC_LISTEN, dimensions);
+  }
+
+  /**
+   * Updates CSS of keyboard. If a key is focused on,
+   * apply the hg-gaze animation to it. TODO: make this neater.
+   * 
+   * If the key is not focused on, clear the hg-gaze animation.
+   * @param {string} keyPressed key pressed on virtual keyboard
+   * @param {boolean} hasFocus true if the users gaze is focused on keyPressed
+   */
+  const updateKeyboardStyles = (args) => {
+    let { key, type, hasFocus } = args;
+    let cssClass = `hg-gaze${dwellTimeMS}`
+
+    // If the key is a simple-keyboard key.
+    if (type === types.KEYBOARD_KEY) {
+      let cssSelector = specialkeys[key] ? specialkeys[key].id : key;
+      if (hasFocus) {
+        keyboard.current.addButtonTheme(cssSelector, cssClass);
+      } else {
+        keyboard.current.removeButtonTheme(cssSelector, cssClass);
+      }
+      return;
+    }
+
+    // If the key is a WordSuggestions key.
+    if (type === types.SUGGESTED_WORD_BLOCK) {
+      let block = suggestions.current.getBlockByTitle(args.title);
+
+      if (block && hasFocus) {
+        block.classList.add(cssClass);
+      } else {
+        block.classList.remove(cssClass);
+      }
+      return;
+    }
+  }
+
+  /**
+   * Calculate the time a key was dwelled on.
+   * if the user has NOT moved their gaze away from the key,
+   * this function returns 0.
+   * 
+   * Otherwise it returns the dwell time in seconds.
+   * @param {string} key key that was pressed
+   * @param {number} timestamp UNIX timestamp of when key was looked at.
+   */
+  const computeDwellTime = (key, timestamp) => {
+    let timestampOfLastFocus = 0;
+
+    setGazeLog(logs => {
+      timestampOfLastFocus = logs[key] || timestamp;
+      return { [key]: timestamp }
+    });
+
+    return Math.abs(timestamp - timestampOfLastFocus);
+  }
+
+  /**
+   * Using what the current input is, find what the next input should be.
+   * 
+   * @param {object} args 
+   */
+  const computeInputFromGaze = args => {
+    let newInput = keyboard.current.getInput();
+
+    if (args.type === types.KEYBOARD_KEY) {
+      if (specialkeys[args.key])
+        newInput = specialkeys[args.key].update(newInput);
+      else
+        newInput = newInput + args.key;
+    }
+
+    if (args.type === types.SUGGESTED_WORD_BLOCK) {
+      let block = suggestions.current.getBlockByTitle(args.title);
+      newInput = computeInputWithSuggestion(block.innerText);
+    }
+
+    return newInput;
+  };
+
+  /**
+   * Called when the user looks at a key.
+   * 
+   * 1. Update keyboard CSS
+   * 2. Calculate dwell time of args.key
+   * 3. If dwell time is long enough, update working string
+   * @param {object} event event obj
+   * @param {object} arg args to the ipc event
+   */
+  const onGazeFocusEvent = (event, args) => {
+    updateKeyboardStyles(args);
+
+    let dwellTimeOfKey = computeDwellTime(args.key, args.timestamp);
+    let keyAcceptedAsInput = dwellTimeOfKey >= dwellTimeMS;
+
+    if (keyAcceptedAsInput) {
+      let newInput = computeInputFromGaze(args);
+
+      setInput(newInput);
+      keyboard.current.setInput(newInput);
+    }
+  }
+
+  /* Updates the string when a word suggestiosn is clicked
+     Basically does set subtraction and concatenates the difference
+  */
+  const computeInputWithSuggestion = suggestion => {
+    let currentInput = keyboard.current.getInput();
+
+    let lastWord = currentInput.substring(currentInput.lastIndexOf(" ") + 1);
+    let trim = suggestion.replace(lastWord, '');
+
+    return `${currentInput}${trim} `;
+  }
+
+  const onChange = input => {
+    setInput(input);
+  };
+
+  /**
+   * A shifted layout would have the -shift suffix.
+   * So for "dvorak", the shifted variant would be "dvorak-shifted"
+   */
+  const handleShift = () => {
+    const currentlyShifted = (layout.includes('-shift'))
+
+    let newLayout = '';
+    if (currentlyShifted)
+      newLayout = layout.split('-')[0]
+    else
+      newLayout = `${layout}-shift`;
+
+    setLayout(newLayout);
+  };
+
+  /**
+   * Called when keyboard button is pressed manually. Check for shift or caps lock
+   * @param {string} button button pressed
+   */
+  const onKeyPress = button => {
+    if (button === "{shift}" || button === "{lock}") {
+      handleShift();
+    }
+  }
+
+  /**
+   * Called when input must change due to manual typing
+   * in <textarea /> window
+   * @param {object} event 
+   */
+  const onChangeInput = event => {
+    const input = event.target.value;
+    setInput(input);
+
+    keyboard.current.setInput(input);
+  }
+
+  const onLayoutChange = e => {
+    setLayout(e.value);
+  }
+
+  const onEyeTrackingIsOnChange = event => {
+    setEyetrackingIsOn(event.target.checked);
+  }
+
+  const onDwellTimeSliderChange = newDwellTimeMS => {
+    setDwellTimeMS(newDwellTimeMS);
+  }
+
+  /**
+   * When user clicks word suggestions, update input variables.
+   * @param {string} clickedWord 
+   */
+  const onWordSuggestionClick = (clickedWord) => {
+    let newInput = computeInputWithSuggestion(clickedWord);
+
+    setInput(newInput);
+    keyboard.current.setInput(newInput);
+  }
+
+  /**
+   * Gets called when component mounts
+   * 
+   * When the use changes the window size,
+   * this affects the screen dimensions and keyboard key offets
+   * meaning these values must be updated to the eytracking
+   * device. The new Gaze Focus Event Listener needs to be started
+   * to accomomdate new screen dimensions
+   */
+  useEffect(() => {
+    window.addEventListener('resize', startGazeFocusEventListener);
+  }, []);
+
+  /**
+   * Gets called when the user turns on/off eyetracking
+   * If eyetracking on, it runs startGazeEventListener()
+   * to kickstart a new tobii eyetracking session
+   * 
+   * If eyetracking off, it unhooks the ASYNC_GAZE_FOCUS_EVENT
+   * listener from IPC. Also remove lingering CSS from keyboard
+   */
+  useEffect(() => {
+    ipcRenderer.removeAllListeners(events.ASYNC_GAZE_FOCUS_EVENT);
+
+    if (eyetrackingIsOn) {
+      ipcRenderer.on(events.ASYNC_GAZE_FOCUS_EVENT, onGazeFocusEvent);
+      startGazeFocusEventListener();
+    } else {
+      keyboard.current.recurseButtons(buttonElement =>
+        updateKeyboardStyles({ key: buttonElement.innerText, type: types.KEYBOARD_KEY, hasFocus: false }));
+
+      suggestions.current.recurseButtons((buttonElement) =>
+        updateKeyboardStyles({ key: buttonElement.innerText, type: types.SUGGESTED_WORD_BLOCK, hasFocus: false, title: buttonElement.title }));
+    }
+  }, [eyetrackingIsOn, dwellTimeMS])
+
+  return (
+    <div className={"component-wrapper"}>
+      <div className={"settings-bar"}>
+        <SliderWrapper
+          onChange={onDwellTimeSliderChange} />
+
+        <Calibrate />
+
+        <SelectLayout
+          layout={layout}
+          onChange={onLayoutChange}
+        />
+
+        <label htmlFor='eid' className={"eyetracking-toggle-label"}>Eyetracking</label>
+        <Toggle
+          className={"eyetracking-toggle"}
+          id='eid'
+          defaultChecked={eyetrackingIsOn}
+          onChange={onEyeTrackingIsOnChange} />
+      </div>
+      <div className={"textarea-wrapper"}>
+        <textarea
+          className={"canvas"}
+          value={input}
+          placeholder={"Type something..."}
+          onChange={onChangeInput}
+        />
+      </div>
+      <WordSuggestions
+        input={input}
+        onSuggestionClick={onWordSuggestionClick}
+        ref={suggestions}
+      />
+      <Keyboard
+        className={"simple-keyboard"}
+        keyboardRef={r => (keyboard.current = r)}
+        layout={defaults.DEFAULT_LAYOUTS}
+        layoutName={layout}
+        onChange={onChange}
+        onKeyPress={onKeyPress}
+        physicalKeyboardHighlight={true}
+      />
+    </div>
+  );
+}
+
+export default KeyboardWrapper;

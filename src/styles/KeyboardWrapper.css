@@ -1,0 +1,104 @@
+.component-wrapper {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-bar {
+    background-color: transparent;
+    padding: 15px 17.5px;
+    color: #ffffff;
+}
+
+.textarea-wrapper {
+    flex: 1;
+}
+
+.eyetracking-toggle {
+    float: right;
+}
+
+.eyetracking-toggle-label {
+    float: right;
+    padding-left: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.canvas {
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    font-size: 25px;
+    border: none;
+    border-color: transparent;
+    box-sizing: border-box;
+    background-color: #282c34;
+    color: #ffffff;
+    resize: none;
+}
+
+.canvas:focus {
+    outline: none !important;
+    border: 1px solid transparent;
+}
+
+
+/*Hack the keyboard lib because I need these to be bigger */
+
+.hg-theme-default {
+    border-top-left-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+}
+
+.hg-row {
+    margin-bottom: 10px !important;
+}
+
+.hg-theme-default .hg-button {
+    height: 90px !important;
+    font-size: 25px;
+    margin-right: 10px !important;
+}
+
+.hg-theme-default .hg-row>div:last-child {
+    margin-right: 0px !important;
+}
+
+.hg-gaze1 {
+    animation: fadeOut .01s;
+}
+
+.hg-gaze250 {
+    animation: fadeOut .25s;
+}
+
+.hg-gaze500 {
+    animation: fadeOut .50s;
+}
+
+.hg-gaze750 {
+    animation: fadeOut .75s;
+}
+
+.hg-gaze1000 {
+    animation: fadeOut 1s;
+}
+
+@keyframes fadeOut {
+    0% {
+        background-color: rgb(48, 209, 88);
+    }
+    25% {
+        background-color: rgba(48, 209, 88, 0.75);
+    }
+    50% {
+        background-color: rgba(48, 209, 88, 0.50);
+    }
+    75% {
+        background-color: rgba(48, 209, 88, 0.25);
+    }
+    100% {
+        background-color: default;
+    }
+}

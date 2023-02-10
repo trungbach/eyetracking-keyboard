@@ -1,0 +1,4 @@
+module.exports = {
+    KEYBOARD_KEY: 'KEYBOARD_KEY',
+    SUGGESTED_WORD_BLOCK: 'SUGGESTED_WORD_BLOCK',
+};
