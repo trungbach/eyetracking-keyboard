@@ -12,7 +12,8 @@ import 'react-toggle/style.css';
 import "../styles/KeyboardWrapper.css";
 
 import {
-  defaults, events, specialkeys,
+  defaults, events, 
+  // specialkeys,
   types
 } from "../constants/index";
 
@@ -81,16 +82,16 @@ const KeyboardWrapper = () => {
     let { key, type, hasFocus } = args;
     let cssClass = `hg-gaze${dwellTimeMS}`
 
-    // If the key is a simple-keyboard key.
-    if (type === types.KEYBOARD_KEY) {
-      let cssSelector = specialkeys[key] ? specialkeys[key].id : key;
-      if (hasFocus) {
-        keyboard.current.addButtonTheme(cssSelector, cssClass);
-      } else {
-        keyboard.current.removeButtonTheme(cssSelector, cssClass);
-      }
-      return;
-    }
+    // // If the key is a simple-keyboard key.
+    // if (type === types.KEYBOARD_KEY) {
+    //   let cssSelector = specialkeys[key] ? specialkeys[key].id : key;
+    //   if (hasFocus) {
+    //     keyboard.current.addButtonTheme(cssSelector, cssClass);
+    //   } else {
+    //     keyboard.current.removeButtonTheme(cssSelector, cssClass);
+    //   }
+    //   return;
+    // }
 
     // If the key is a WordSuggestions key.
     if (type === types.SUGGESTED_WORD_BLOCK) {
@@ -133,12 +134,12 @@ const KeyboardWrapper = () => {
   const computeInputFromGaze = args => {
     let newInput = keyboard.current.getInput();
 
-    if (args.type === types.KEYBOARD_KEY) {
-      if (specialkeys[args.key])
-        newInput = specialkeys[args.key].update(newInput);
-      else
-        newInput = newInput + args.key;
-    }
+    // if (args.type === types.KEYBOARD_KEY) {
+    //   if (specialkeys[args.key])
+    //     newInput = specialkeys[args.key].update(newInput);
+    //   else
+    //     newInput = newInput + args.key;
+    // }
 
     if (args.type === types.SUGGESTED_WORD_BLOCK) {
       let block = suggestions.current.getBlockByTitle(args.title);

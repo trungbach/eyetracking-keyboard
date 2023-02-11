@@ -1,6 +1,6 @@
 const { types } = require('../constants/index')
 
-class TobiiRegion {
+export class TobiiRegion {
     constructor(id, regionType, buttonElement) {
         if (!types[regionType])
             throw new Error(`Invalid TobiiRegion type, got regionType=${regionType}`);
@@ -18,4 +18,4 @@ class TobiiRegion {
     }
 }
 
-module.exports = TobiiRegion;
+// module.exports = TobiiRegion;

@@ -4,6 +4,6 @@
 module.exports = {
     events: require('./events'),
     defaults: require('./defaults'),
-    specialkeys: require('./special-keys'),
+    // specialkeys: require('./special-keys'),
     types: require('./types')
 };
