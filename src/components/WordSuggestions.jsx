@@ -29,6 +29,7 @@ const WordSuggestions = forwardRef((props, ref) => {
     const blockLeft = useRef();
     const blockMiddle = useRef();
     const blockRight = useRef();
+    const blockReset = useRef();
 
     /**
      * Extract the last word in a string.
@@ -83,6 +84,7 @@ const WordSuggestions = forwardRef((props, ref) => {
             callback(blockLeft.current);
             callback(blockMiddle.current);
             callback(blockRight.current);
+            callback(blockReset.current);
         },
 
         /**
@@ -99,6 +101,8 @@ const WordSuggestions = forwardRef((props, ref) => {
 
             if (title === blockRight.current.title)
                 return blockRight.current;
+            if (title === blockReset.current.title)
+                return blockReset.current;
         }
     }));
 
@@ -138,6 +142,11 @@ const WordSuggestions = forwardRef((props, ref) => {
                 ref={blockRight}
                 title={'right'}
                 word={getWordAtIndex(suggestions, 2)} />
+            <Block
+                onBlockClick={props.onResetClick}
+                ref={blockReset}
+                title={'reset'}
+                word={'Reset'} />
         </div>
     );
 });

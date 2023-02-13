@@ -1,7 +1,6 @@
-const { ipcMain, dialog } = require('electron');
+const { ipcMain } = require('electron');
 const { fork } = require('child_process');
 const path = require('path');
-
 const { events } = require('../constants/index');
 
 const PROCESS_NAME = 'eyetracking-child.js';

@@ -1,8 +1,8 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow } = require('electron')
 const url = require('url')
 const path = require('path')
-let mainWindow
 
+let mainWindow
 // Electron window params, we can config this to better fit the use of our app.
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -15,26 +15,14 @@ function createWindow() {
         },
     })
 
-    const startUrl = process.env.ELECTRON_START_URL || url.format({
-        pathname: path.join(__dirname, '../index.html'),
-        protocol: 'file:',
-        slashes: true,
-    });
-    // if (process.env.REACT_APP_ENV_UPDATE_CHANNEL_STRING === 'dev') {
-    //     mainWindow.loadURL(startUrl);
-    // } else {
-    //     mainWindow.loadURL('file:///' + __dirname + "/index.html");
-    // }
-    // mainWindow.loadURL("http://localhost:3000");
-
     // Load html from environment variable, else from html dist file.
     mainWindow.loadURL(
-        // process.env.ELECTRON_START_URL ||
-        url.format({
-            pathname: path.join(__dirname, './index.html'),
-            protocol: 'file:',
-            slashes: true,
-        })
+        "http://localhost:3000"
+        // url.format({
+        //     pathname: path.join(__dirname, './index.html'),
+        //     protocol: 'file:',
+        //     slashes: true,
+        // })
     )
 
     mainWindow.on('closed', () => {
@@ -58,9 +46,3 @@ app.on('activate', () => {
         createWindow()
     }
 })
-
-/**
- * Register IPC hooks.
- */
-require('../ipc/eyetracking');
-require('../ipc/calibrate');

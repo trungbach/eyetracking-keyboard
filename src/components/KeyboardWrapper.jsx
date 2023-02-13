@@ -16,8 +16,7 @@ import {
   // specialkeys,
   types
 } from "../constants/index";
-
-const TobiiRegion = require('../util/TobiiRegion');
+import TobiiRegion from '../util/TobiiRegion'
 const { ipcRenderer } = window.require("electron");
 
 const KeyboardWrapper = () => {
@@ -30,21 +29,19 @@ const KeyboardWrapper = () => {
   const keyboard = useRef();
   const suggestions = useRef();
 
-  /**
-   * Gets screen and keyboard metadata, and pushes said info to
-   * the eyetracking module via ipc.
-   * 
-   * Begins eyetracking listen loop.
-   * 
-   * On each gaze focus event, calls onGazeFocusEvent()
-   */
+ /**
+    * Nhận metadata về màn hình và bàn phím, đồng thời đẩy thông tin đã nói tới
+    * mô-đun eyetracking thông qua ipc.
+    *
+    * Bắt đầu vòng lặp listen eyetracking.
+    *
+    * Trên mỗi event focus vào ánh nhìn, gọi onGazeFocusEvent()
+    */
   const startGazeFocusEventListener = () => {
     if (!eyetrackingIsOn)
       return;
 
     let rectangles = [];
-
-    // No, I'm not going to put this in a loop. It would look terrible!
 
     keyboard.current.recurseButtons(buttonElement => {
       rectangles.push(
@@ -67,16 +64,16 @@ const KeyboardWrapper = () => {
     console.log(dimensions);
 
     // Start Tobii listen loop
-    ipcRenderer.send(events.ASYNC_LISTEN, dimensions);
+    // ipcRenderer.send(events.ASYNC_LISTEN, dimensions);
   }
 
   /**
-   * Updates CSS of keyboard. If a key is focused on,
-   * apply the hg-gaze animation to it. TODO: make this neater.
-   * 
-   * If the key is not focused on, clear the hg-gaze animation.
-   * @param {string} keyPressed key pressed on virtual keyboard
-   * @param {boolean} hasFocus true if the users gaze is focused on keyPressed
+   * Cập nhật CSS của bàn phím. Nếu một phím được tập trung vào,
+   * áp dụng hình ảnh động hg-gaze cho nó. TODO: làm cho nó gọn gàng hơn.
+   *
+   * Nếu phím không được tập trung vào, xóa  hg-gaze.
+   * @param {string} keyPressed 
+   * @param {boolean} hasFocus 
    */
   const updateKeyboardStyles = (args) => {
     let { key, type, hasFocus } = args;
@@ -93,7 +90,6 @@ const KeyboardWrapper = () => {
     //   return;
     // }
 
-    // If the key is a WordSuggestions key.
     if (type === types.SUGGESTED_WORD_BLOCK) {
       let block = suggestions.current.getBlockByTitle(args.title);
 
@@ -107,13 +103,12 @@ const KeyboardWrapper = () => {
   }
 
   /**
-   * Calculate the time a key was dwelled on.
-   * if the user has NOT moved their gaze away from the key,
-   * this function returns 0.
+   * tính thời gian 1 phím được nhìn vào.
+   * nếu user không rời mắt khỏi phím, hàm trả về 0. 
+   * Nếu ko thì trả thời gian theo giaâ
    * 
-   * Otherwise it returns the dwell time in seconds.
-   * @param {string} key key that was pressed
-   * @param {number} timestamp UNIX timestamp of when key was looked at.
+   * @param {string} key 
+   * @param {number} timestamp
    */
   const computeDwellTime = (key, timestamp) => {
     let timestampOfLastFocus = 0;
@@ -127,7 +122,7 @@ const KeyboardWrapper = () => {
   }
 
   /**
-   * Using what the current input is, find what the next input should be.
+   * Sử dụng input hiện tại là gì, tìm input tiếp theo.
    * 
    * @param {object} args 
    */
@@ -150,12 +145,12 @@ const KeyboardWrapper = () => {
   };
 
   /**
-   * Called when the user looks at a key.
+   * Được gọi khi user nhìn vào một phím..
    * 
    * 1. Update keyboard CSS
    * 2. Calculate dwell time of args.key
    * 3. If dwell time is long enough, update working string
-   * @param {object} event event obj
+   * @param {object} event 
    * @param {object} arg args to the ipc event
    */
   const onGazeFocusEvent = (event, args) => {
@@ -172,8 +167,8 @@ const KeyboardWrapper = () => {
     }
   }
 
-  /* Updates the string when a word suggestiosn is clicked
-     Basically does set subtraction and concatenates the difference
+  /* Cập nhật chuỗi khi một từ gợi ý được nhấp vào
+     Về cơ bản không đặt phép trừ và nối sự khác biệt
   */
   const computeInputWithSuggestion = suggestion => {
     let currentInput = keyboard.current.getInput();
@@ -205,8 +200,8 @@ const KeyboardWrapper = () => {
   };
 
   /**
-   * Called when keyboard button is pressed manually. Check for shift or caps lock
-   * @param {string} button button pressed
+   * Được gọi khi nút bàn phím được nhấn thủ công. Kiểm tra shift hoặc caps lock
+   * @param {string} button 
    */
   const onKeyPress = button => {
     if (button === "{shift}" || button === "{lock}") {
@@ -214,11 +209,6 @@ const KeyboardWrapper = () => {
     }
   }
 
-  /**
-   * Called when input must change due to manual typing
-   * in <textarea /> window
-   * @param {object} event 
-   */
   const onChangeInput = event => {
     const input = event.target.value;
     setInput(input);
@@ -239,7 +229,7 @@ const KeyboardWrapper = () => {
   }
 
   /**
-   * When user clicks word suggestions, update input variables.
+   * Khi người dùng nhấp vào từ gợi ý, cập nhật các biến đầu vào.
    * @param {string} clickedWord 
    */
   const onWordSuggestionClick = (clickedWord) => {
@@ -250,26 +240,34 @@ const KeyboardWrapper = () => {
   }
 
   /**
-   * Gets called when component mounts
-   * 
-   * When the use changes the window size,
-   * this affects the screen dimensions and keyboard key offets
-   * meaning these values must be updated to the eytracking
-   * device. The new Gaze Focus Event Listener needs to be started
-   * to accomomdate new screen dimensions
+   * Khi người dùng nhấp vào reset, xoa taáat cả các biến đầu vào.
+   */
+  const onResetClick = () => {
+    setInput('');
+    keyboard.current.setInput('');
+  }
+
+  /**
+    * Được gọi sau khi component mount.
+    *
+    * Khi sử dụng thay đổi kích thước window,
+    * điều này ảnh hưởng đến kích thước màn hình và phím bàn phím
+    * có nghĩa là các giá trị này phải được cập nhật vào thiết bị eyetracking
+    * Trình xử lý sự kiện Gaze Focus mới cần được bắt đầu
+    * để chứa kích thước màn hình mới
    */
   useEffect(() => {
     window.addEventListener('resize', startGazeFocusEventListener);
   }, []);
 
   /**
-   * Gets called when the user turns on/off eyetracking
-   * If eyetracking on, it runs startGazeEventListener()
-   * to kickstart a new tobii eyetracking session
-   * 
-   * If eyetracking off, it unhooks the ASYNC_GAZE_FOCUS_EVENT
-   * listener from IPC. Also remove lingering CSS from keyboard
-   */
+    * Được gọi khi người dùng bật/tắt eyetracking
+    * Nếu bật eyetracking, nó sẽ chạy startGazeEventListener()
+    * để khởi động phiên theo dõi mắt tobii mới
+    *
+    * Nếu tắt tính năng theo dõi ánh mắt, nó sẽ gỡ bỏ ASYNC_GAZE_FOCUS_EVENT
+    * listener từ IPC. Đồng thời xóa CSS khỏi bàn phím
+    */
   useEffect(() => {
     ipcRenderer.removeAllListeners(events.ASYNC_GAZE_FOCUS_EVENT);
 
@@ -316,6 +314,7 @@ const KeyboardWrapper = () => {
       <WordSuggestions
         input={input}
         onSuggestionClick={onWordSuggestionClick}
+        onResetClick={onResetClick}
         ref={suggestions}
       />
       <Keyboard
