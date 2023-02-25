@@ -7,11 +7,9 @@ import {
 const { ipcRenderer } = window.require("electron");
 
 /**
- * Handles calibrating the Tobii eyetracker with a button click.
- * @param {object} props 
+ * Handles calibrating the Tobii eyetracker
  */
-const Calibrate = props => {
-
+const Calibrate = () => {
     const onCalibrateClick = e => {
         ipcRenderer.send(events.CALIBRATE_TOBII_EYETRACKER, 1);
     };

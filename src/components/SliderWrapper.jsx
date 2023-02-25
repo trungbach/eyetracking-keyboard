@@ -57,6 +57,8 @@ const SliderWrapper = (props) => {
     };
 
     return (
+        <div className='slide-wrapper'>
+        <span>Adjust the dwelltime (ms):</span>
         <Slider
             className={"wrapper"}
             min={defaults.DEFAULT_DWELL_TIME_OPTIONS_MS[0] / 10}
@@ -66,6 +68,7 @@ const SliderWrapper = (props) => {
             step={null}
             handle={handle}
         />
+        </div>
 
     );
 };

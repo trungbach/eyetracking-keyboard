@@ -8,12 +8,12 @@ import { defaults } from "../constants/index";
 const Block = forwardRef((props, ref) => {
     return (
         <div
-            className={"block"}
+            className={props.isReset ? "block-reset" : "block"}
             onClick={() => props.onBlockClick(props.word)}
             title={props.title}
             ref={ref}>
             <span>
-                {props.word || ' '}
+                {props.word}
             </span>
         </div>
     )
@@ -146,7 +146,9 @@ const WordSuggestions = forwardRef((props, ref) => {
                 onBlockClick={props.onResetClick}
                 ref={blockReset}
                 title={'reset'}
-                word={'Reset'} />
+                word={'Reset'} 
+                isReset={true}
+                />
         </div>
     );
 });

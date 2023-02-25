@@ -1,6 +1,9 @@
+.slide-wrapper {
+    display: inline-block;
+}
 .wrapper {
     width: 500px;
     display: inline-block;
-    margin-left: 50px;
+    margin-left: 20px;
     margin-right: 50px;
 }

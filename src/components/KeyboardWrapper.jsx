@@ -2,26 +2,25 @@ import React, { useEffect, useRef, useState } from 'react';
 import Keyboard from 'react-simple-keyboard';
 import Toggle from 'react-toggle';
 import Calibrate from './Calibrate';
-import SelectLayout from './SelectLayout';
 import SliderWrapper from './SliderWrapper';
 import WordSuggestions from './WordSuggestions';
 
 import 'react-simple-keyboard/build/css/index.css';
 import 'react-toggle/style.css';
-
 import "../styles/KeyboardWrapper.css";
 
 import {
   defaults, events, 
-  // specialkeys,
+  // specialKeys,
   types
 } from "../constants/index";
 import TobiiRegion from '../util/TobiiRegion'
+import TextToSpeech from './TextToSpeech';
+import specialKeys from '../constants/special-keys';
 const { ipcRenderer } = window.require("electron");
 
 const KeyboardWrapper = () => {
   const [input, setInput] = useState("");
-  const [layout, setLayout] = useState(defaults.DEFUALT_LAYOUT_STARTUP);
   const [dwellTimeMS, setDwellTimeMS] = useState(defaults.DEFAULT_DWELL_TIME_MS);
   const [eyetrackingIsOn, setEyetrackingIsOn] = useState(defaults.DEFAULT_EYETRACKING_ON);
   const [gazeLog, setGazeLog] = useState({});
@@ -61,10 +60,8 @@ const KeyboardWrapper = () => {
       rectangles: rectangles
     };
 
-    console.log(dimensions);
-
     // Start Tobii listen loop
-    // ipcRenderer.send(events.ASYNC_LISTEN, dimensions);
+    ipcRenderer.send(events.ASYNC_LISTEN, dimensions);
   }
 
   /**
@@ -79,16 +76,17 @@ const KeyboardWrapper = () => {
     let { key, type, hasFocus } = args;
     let cssClass = `hg-gaze${dwellTimeMS}`
 
-    // // If the key is a simple-keyboard key.
-    // if (type === types.KEYBOARD_KEY) {
-    //   let cssSelector = specialkeys[key] ? specialkeys[key].id : key;
-    //   if (hasFocus) {
-    //     keyboard.current.addButtonTheme(cssSelector, cssClass);
-    //   } else {
-    //     keyboard.current.removeButtonTheme(cssSelector, cssClass);
-    //   }
-    //   return;
-    // }
+    // If the key is a simple-keyboard key.
+    if (type === types.KEYBOARD_KEY) {
+      let cssSelector = specialKeys[key] ? specialKeys[key].id : key;
+
+      if (hasFocus) {
+        keyboard.current.addButtonTheme(cssSelector, cssClass);
+      } else {
+        keyboard.current.removeButtonTheme(cssSelector, cssClass);
+      }
+      return;
+    }
 
     if (type === types.SUGGESTED_WORD_BLOCK) {
       let block = suggestions.current.getBlockByTitle(args.title);
@@ -129,16 +127,20 @@ const KeyboardWrapper = () => {
   const computeInputFromGaze = args => {
     let newInput = keyboard.current.getInput();
 
-    // if (args.type === types.KEYBOARD_KEY) {
-    //   if (specialkeys[args.key])
-    //     newInput = specialkeys[args.key].update(newInput);
-    //   else
-    //     newInput = newInput + args.key;
-    // }
+    if (args.type === types.KEYBOARD_KEY) {
+      if (specialKeys[args.key])
+        newInput = specialKeys[args.key].update(newInput);
+      else
+        newInput = newInput + args.key;
+    }
 
     if (args.type === types.SUGGESTED_WORD_BLOCK) {
       let block = suggestions.current.getBlockByTitle(args.title);
-      newInput = computeInputWithSuggestion(block.innerText);
+      if(block.innerText === 'Reset') {
+        newInput = '';
+      } else {
+        newInput = computeInputWithSuggestion(block.innerText);
+      }
     }
 
     return newInput;
@@ -167,9 +169,7 @@ const KeyboardWrapper = () => {
     }
   }
 
-  /* Cập nhật chuỗi khi một từ gợi ý được nhấp vào
-     Về cơ bản không đặt phép trừ và nối sự khác biệt
-  */
+  /* Cập nhật chuỗi khi một từ gợi ý được nhấp vào */
   const computeInputWithSuggestion = suggestion => {
     let currentInput = keyboard.current.getInput();
 
@@ -183,42 +183,12 @@ const KeyboardWrapper = () => {
     setInput(input);
   };
 
-  /**
-   * A shifted layout would have the -shift suffix.
-   * So for "dvorak", the shifted variant would be "dvorak-shifted"
-   */
-  const handleShift = () => {
-    const currentlyShifted = (layout.includes('-shift'))
+  // const onChangeInput = event => {
+  //   const input = event.target.value;
+  //   setInput(input);
 
-    let newLayout = '';
-    if (currentlyShifted)
-      newLayout = layout.split('-')[0]
-    else
-      newLayout = `${layout}-shift`;
-
-    setLayout(newLayout);
-  };
-
-  /**
-   * Được gọi khi nút bàn phím được nhấn thủ công. Kiểm tra shift hoặc caps lock
-   * @param {string} button 
-   */
-  const onKeyPress = button => {
-    if (button === "{shift}" || button === "{lock}") {
-      handleShift();
-    }
-  }
-
-  const onChangeInput = event => {
-    const input = event.target.value;
-    setInput(input);
-
-    keyboard.current.setInput(input);
-  }
-
-  const onLayoutChange = e => {
-    setLayout(e.value);
-  }
+  //   keyboard.current.setInput(input);
+  // }
 
   const onEyeTrackingIsOnChange = event => {
     setEyetrackingIsOn(event.target.checked);
@@ -291,10 +261,7 @@ const KeyboardWrapper = () => {
 
         <Calibrate />
 
-        <SelectLayout
-          layout={layout}
-          onChange={onLayoutChange}
-        />
+        <TextToSpeech string={input} />
 
         <label htmlFor='eid' className={"eyetracking-toggle-label"}>Eyetracking</label>
         <Toggle
@@ -308,7 +275,7 @@ const KeyboardWrapper = () => {
           className={"canvas"}
           value={input}
           placeholder={"Type something..."}
-          onChange={onChangeInput}
+          // onChange={onChangeInput}
         />
       </div>
       <WordSuggestions
@@ -321,9 +288,8 @@ const KeyboardWrapper = () => {
         className={"simple-keyboard"}
         keyboardRef={r => (keyboard.current = r)}
         layout={defaults.DEFAULT_LAYOUTS}
-        layoutName={layout}
+        layoutName="default"
         onChange={onChange}
-        onKeyPress={onKeyPress}
         physicalKeyboardHighlight={true}
       />
     </div>

@@ -24,5 +24,4 @@ class Calibrate {
         });
     };
 }
-
 module.exports = Calibrate;

@@ -17,5 +17,3 @@ export default class TobiiRegion {
         this.type = regionType;
     }
 }
-
-// module.exports = TobiiRegion;

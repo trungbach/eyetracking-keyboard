@@ -1,4 +1,4 @@
-.cal {
+.speak {
     display: inline-block;
     color: #fff;
     white-space: nowrap;
@@ -11,7 +11,7 @@
     border-radius: 20px;
 }
 
-.cal:focus {
+.speak:focus {
     outline: none !important;
     border: 1px solid transparent;
 }

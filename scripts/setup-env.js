@@ -1,6 +1,6 @@
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
-
+nvm
 const NODE_VERSION = 14;
 const NODE_GYP_VERSION = 7;
 const NF_VERSION = 3;
