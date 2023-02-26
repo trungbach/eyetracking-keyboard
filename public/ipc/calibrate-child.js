@@ -6,7 +6,6 @@
  * and this file communicates eyetracking data to electron via ipc.
  */
 const eyetracking = require('eyetracking');
-const { defaults } = require('../constants/index');
 
 let lastGazeTimestamp = Date.now();
 process.on('message', (arg) => {
@@ -25,7 +24,7 @@ process.on('message', (arg) => {
 
         lastGazeTimestamp = timestamp;
 
-        if (diff > defaults.DEFAULT_RECALIBRATE_TIMER) {
+        if (diff > 30000) {
             console.log('timestamp', timestamp)
             process.send({ x, y, validity, timestamp })
 

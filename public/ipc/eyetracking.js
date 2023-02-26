@@ -1,7 +1,6 @@
 const { ipcMain } = require('electron');
 const { fork } = require('child_process');
 const path = require('path');
-const { events } = require('../constants/index');
 const PROCESS_NAME = 'eyetracking-child.js';
 
 /**
@@ -13,7 +12,7 @@ const PROCESS_NAME = 'eyetracking-child.js';
  * using a event.reply() call. 
  */
 let eyetrackingProcess;
-ipcMain.on(events.ASYNC_LISTEN, (event, arg) => {
+ipcMain.on("ASYNC_LISTEN", (event, arg) => {
 
     // Check if there is a currently running eyetracking process
     // if so, kill it
@@ -40,6 +39,6 @@ ipcMain.on(events.ASYNC_LISTEN, (event, arg) => {
             ...arg.rectangles[evt.id]
         };
 
-        event.reply(events.ASYNC_GAZE_FOCUS_EVENT, payload);
+        event.reply('ASYNC_GAZE_FOCUS_EVENT', payload);
     });
 });

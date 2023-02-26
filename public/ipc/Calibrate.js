@@ -1,11 +1,9 @@
 const fs = require('fs');
 const { exec } = require("child_process");
 
-const { defaults } = require('../constants/index');
-
 class Calibrate {
     static calibrate(basePath) {
-        let base = (basePath) ? basePath : defaults.DEFAULT_TOBII_EXPERIENCE_PATH;
+        let base = "C:\\Program Files\\Tobii";
         if (!fs.existsSync(base)) {
             throw new Error(`${this.base} can't be found, do you have Tobii Experience installed?`);
         }

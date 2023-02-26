@@ -53,5 +53,5 @@ app.on('activate', () => {
     }
 })
 
-// require('../src/ipc/calibrate');
-// require('../src/ipc/eyetracking');
+require('./ipc/calibration');
+require('./ipc/eyetracking');

@@ -1,19 +1,18 @@
 const { ipcMain } = require('electron');
 const { fork } = require('child_process');
 const path = require('path');
-const { events } = require('../constants/index');
 
-const Calibrate = require('../util/Calibrate');
+const Calibrate = require('./Calibrate');
 
 const PROCESS_NAME = 'calibrate-child.js';
 
 // Call this func when user want to recalibrate
-ipcMain.on(events.CALIBRATE_TOBII_EYETRACKER, (event, arg) => {
+ipcMain.on("CALIBRATE_TOBII_EYETRACKER", (event, arg) => {
     Calibrate.calibrate();
 });
 
 let eyetrackingProcess;
-ipcMain.on(events.CALIBRATE_TOBII_WHEN_IDLE, (event, arg) => {
+ipcMain.on("CALIBRATE_TOBII_WHEN_IDLE", (event, arg) => {
     
     // Check if there is a currently running eyetracking process
     // if so, kill it
