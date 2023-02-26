@@ -10,14 +10,14 @@ function createWindow() {
         height: 1080,
         webPreferences: {
             nodeIntegration: true,
-            // nodeIntegrationInWorker: true,
-            // contextIsolation: false
+            nodeIntegrationInWorker: true,
+            contextIsolation: false
         },
     })
 
     // In production, set the initial browser path to the local bundle generated
-  // by the Create React App build process.
-  // In development, set it to localhost to allow live/hot-reloading.
+    // by the Create React App build process.
+    // In development, set it to localhost to allow live/hot-reloading.
     const appURL = app.isPackaged
     ? url.format({
         pathname: path.join(__dirname, "index.html"),
@@ -27,14 +27,16 @@ function createWindow() {
     : "http://localhost:3000";
     
     mainWindow.loadURL(appURL);
-
-    if (!app.isPackaged) {
+    
+    // if (!app.isPackaged) {
         mainWindow.webContents.openDevTools();
-    }
+    // }
 
     mainWindow.on('closed', () => {
         mainWindow = null
     })
+
+    console.log('ok')
 }
 
 app.on('ready', createWindow)
@@ -50,3 +52,6 @@ app.on('activate', () => {
         createWindow()
     }
 })
+
+// require('../src/ipc/calibrate');
+// require('../src/ipc/eyetracking');

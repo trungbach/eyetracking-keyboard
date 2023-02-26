@@ -15,22 +15,28 @@ function createWindow() {
         },
     })
 
-    // Load html from environment variable, else from html dist file.
-    mainWindow.loadURL(
-        // "http://localhost:3000"
-        url.format({
-            pathname: path.join(__dirname, './index.html'),
-            protocol: 'file:',
-            slashes: true,
+    // In production, set the initial browser path to the local bundle generated
+    // by the Create React App build process.
+    // In development, set it to localhost to allow live/hot-reloading.
+    const appURL = app.isPackaged
+    ? url.format({
+        pathname: path.join(__dirname, "index.html"),
+        protocol: "file:",
+        slashes: true,
         })
-    )
+    : "http://localhost:3000";
+    
+    mainWindow.loadURL(appURL);
+    
+    // if (!app.isPackaged) {
+        mainWindow.webContents.openDevTools();
+    // }
 
     mainWindow.on('closed', () => {
         mainWindow = null
     })
 
-     // Open the DevTools.
-     mainWindow.webContents.openDevTools()
+    console.log('ok')
 }
 
 app.on('ready', createWindow)
@@ -47,5 +53,5 @@ app.on('activate', () => {
     }
 })
 
-require('./ipc/eyetracking');
 require('./ipc/calibrate');
+require('./ipc/eyetracking');

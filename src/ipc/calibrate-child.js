@@ -18,7 +18,6 @@ process.on('message', (arg) => {
     }
 
     let screen = new eyetracking(arg.width, arg.height);
-
     screen.ListenGazePoint((x, y, validity, timestamp) => {
         timestamp = Date.now();
 
@@ -27,7 +26,9 @@ process.on('message', (arg) => {
         lastGazeTimestamp = timestamp;
 
         if (diff > defaults.DEFAULT_RECALIBRATE_TIMER) {
+            console.log('timestamp', timestamp)
             process.send({ x, y, validity, timestamp })
+
         }
 
     });

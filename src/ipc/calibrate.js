@@ -14,7 +14,7 @@ ipcMain.on(events.CALIBRATE_TOBII_EYETRACKER, (event, arg) => {
 
 let eyetrackingProcess;
 ipcMain.on(events.CALIBRATE_TOBII_WHEN_IDLE, (event, arg) => {
-
+    
     // Check if there is a currently running eyetracking process
     // if so, kill it
     if (eyetrackingProcess) {

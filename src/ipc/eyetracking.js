@@ -2,7 +2,6 @@ const { ipcMain } = require('electron');
 const { fork } = require('child_process');
 const path = require('path');
 const { events } = require('../constants/index');
-
 const PROCESS_NAME = 'eyetracking-child.js';
 
 /**
@@ -27,7 +26,7 @@ ipcMain.on(events.ASYNC_LISTEN, (event, arg) => {
     eyetrackingProcess = fork(path.join(__dirname, PROCESS_NAME), [], {
         stdio: ['pipe', 'pipe', 'pipe', 'ipc']
     });
-
+    
     console.log(`Forking ${PROCESS_NAME} process (${eyetrackingProcess.pid || 'no pid found'})`);
     console.log(`pid (${eyetrackingProcess.pid}): width = ${arg.width} height = ${arg.height} rectangles = ${arg.rectangles.length}`);
 
