@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Keyboard from 'react-simple-keyboard';
 import Toggle from 'react-toggle';
 import Calibrate from './Calibrate';
@@ -10,13 +10,12 @@ import 'react-toggle/style.css';
 import "../styles/KeyboardWrapper.css";
 
 import {
-  defaults, events, 
-  // specialKeys,
+  defaults, events,
   types
 } from "../constants/index";
-import TobiiRegion from '../util/TobiiRegion'
-import TextToSpeech from './TextToSpeech';
 import specialKeys from '../constants/special-keys';
+import TobiiRegion from '../util/TobiiRegion';
+import TextToSpeech from './TextToSpeech';
 const { ipcRenderer } = window.require("electron");
 
 const KeyboardWrapper = () => {
@@ -27,6 +26,15 @@ const KeyboardWrapper = () => {
 
   const keyboard = useRef();
   const suggestions = useRef();
+
+  /**
+   * Sound effect typing 
+   */
+  useEffect(() => {
+    if(input) {
+      document.getElementById('typing-effect').play();
+    }
+  },[input])
 
  /**
     * Nhận metadata về màn hình và bàn phím, đồng thời đẩy thông tin đã nói tới
@@ -292,6 +300,10 @@ const KeyboardWrapper = () => {
         onChange={onChange}
         physicalKeyboardHighlight={true}
       />
+
+      <audio style={{display: "none"}} controls id='typing-effect'>
+        <source src="typing-effect.wav" type="audio/wav" />
+      </audio>
     </div>
   );
 }
