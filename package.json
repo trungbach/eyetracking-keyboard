@@ -1,79 +1,79 @@
 {
-    "name": "eyetracking-virtual-keyboard",
-    "version": "1.0.0",
-    "private": true,
-    "author": "trungbach",
-    "dependencies": {
-        "eslint": "^6.6.0",
-        "eslint-config-airbnb": "^18.2.0",
-        "eslint-plugin-import": "^2.22.1",
-        "eslint-plugin-jsx-a11y": "^6.3.1",
-        "eslint-plugin-react": "^7.21.5",
-        "eyetracking": "^3.0.1",
-        "rc-slider": "^9.7.1",
-        "react": "^17.0.0",
-        "react-dom": "^17.0.0",
-        "react-scripts": "3.4.4",
-        "react-simple-keyboard": "^2.5.57",
-        "react-toggle": "^4.1.1"
+  "name": "eyetracking-virtual-keyboard",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Bach Van Trung<trunga2k29@gmail.com>",
+  "dependencies": {
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb": "^18.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-react": "^7.21.5",
+    "eyetracking": "^3.0.1",
+    "rc-slider": "^9.7.1",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
+    "react-scripts": "3.4.4",
+    "react-simple-keyboard": "^2.5.57",
+    "react-toggle": "^4.1.1"
+  },
+  "homepage": "./",
+  "main": "public/electron.js",
+  "scripts": {
+    "start": "nf start -p 3000",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "electron": "electron .",
+    "electron-start": "node src/start-react",
+    "react-start": "react-scripts start",
+    "dist": "npm run build && electron-builder",
+    "postinstall": "electron-builder install-app-deps",
+    "rebuild-eyetracking": "cd ./node_modules/eyetracking/cpp && set HOME=~/.electron-gyp && node-gyp rebuild --target=10.1.4 --arch=x64 --dist-url=https://electronjs.org/headers",
+    "setup-env": "node ./scripts/setup-env.js",
+    "package": "electron-builder build --win -c.extraMetadata.main=build/electron.js --publish never",
+    "publish": "electron-builder build --win --publish always",
+    "build-package": "npm run build && electron-builder build --win -c.extraMetadata.main=build/electron.js --publish never"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^10.1.4",
+    "electron-builder": "^22.14.13",
+    "electron-rebuild": "^2.3.4"
+  },
+  "build": {
+    "generateUpdatesFilesForAllChannels": true,
+    "appId": "com.electron.eyetracking-app",
+    "productName": "eyetracking-app",
+    "copyright": "BachTrung",
+    "win": {
+      "publish": {
+        "provider": "github",
+        "owner": "trungbach",
+        "repo": "eyetracking-keyboard"
+      }
     },
-    "homepage": "./",
-    "main": "public/electron.js",
-    "scripts": {
-        "start": "nf start -p 3000",
-        "build": "react-scripts build",
-        "test": "react-scripts test --env=jsdom",
-        "eject": "react-scripts eject",
-        "electron": "electron .",
-        "electron-start": "node src/start-react",
-        "react-start": "react-scripts start",
-        "dist": "npm run build && electron-builder",
-        "postinstall": "electron-builder install-app-deps",
-        "rebuild-eyetracking": "cd ./node_modules/eyetracking/cpp && set HOME=~/.electron-gyp && node-gyp rebuild --target=10.1.4 --arch=x64 --dist-url=https://electronjs.org/headers",
-        "setup-env": "node ./scripts/setup-env.js",
-        "package": "electron-builder build --win -c.extraMetadata.main=build/electron.js --publish never",
-        "publish": "electron-builder build --win --publish always",
-        "build-package": "npm run build && electron-builder build --win -c.extraMetadata.main=build/electron.js --publish never"
-    },
-    "eslintConfig": {
-        "extends": "react-app"
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    },
-    "devDependencies": {
-        "electron": "^10.1.4",
-        "electron-builder": "^22.14.13",
-        "electron-rebuild": "^2.3.4"
-    },
-    "build": {
-        "generateUpdatesFilesForAllChannels": true,
-        "appId": "com.electron.trung-app",
-        "productName": "trung-app",
-        "copyright": "BachTrung",
-        "win": {
-            "publish": {
-                "provider": "github",
-                "owner": "trungbach",
-                "repo": "eyetracking-keyboard"
-            }
-        },
-        "files": [
-            "build/**/*",
-            "node_modules/**/*"
-        ],
-        "publish": {
-            "provider": "github",
-            "owner": "trungbach"
-        }
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "trungbach"
     }
+  }
 }
